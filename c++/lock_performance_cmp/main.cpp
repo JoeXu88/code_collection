@@ -65,6 +65,11 @@ void test_time(const std::function<void()>& f, const std::string& name)
 	// printf("x: %d\n", g_xi);
 	// printf("atomic x: %d\n", g_atomic_int.load());
     assert(g_xi == expect || g_atomic_int.load() == expect);
+    
+	for(int i=0; i<n; i++)
+    {
+        delete pthreads[i];
+    }
 	pthreads.clear();
 }
 
