@@ -10,6 +10,7 @@
 #include "../c++11/timecost.h"
 #include "../c++11/semaphore.h"
 
+// #define ONLY_READ
 semaphore g_sem;
 spinlock g_spinlock;
 uint32_t g_xi = 0;
@@ -20,7 +21,11 @@ void work()
 {
 	for(int i=0; i<g_thres; i++)
 	{
+    #ifdef ONLY_READ
+        if(g_xi) continue;
+    #else
 		g_xi++;
+    #endif
 	}
 }
 void thread_func_sem()
@@ -39,8 +44,15 @@ void thread_func_spinlock()
 
 void thread_func_atomic()
 {
+    int tmp = 1;
 	for(int i=0; i<g_thres; i++)
-		g_atomic_int++;
+    {
+    #ifdef ONLY_READ
+        if(g_atomic_int) tmp = 0; //if we only read atomic value, it is fast enough, even close to raw value
+    #else
+		g_atomic_int++;  //if we modify data, it will be very slow, builder will add many memory barrier into the code, which will cause more time cost
+    #endif
+    }
 }
 
 void test_time(const std::function<void()>& f, const std::string& name)
@@ -65,7 +77,7 @@ void test_time(const std::function<void()>& f, const std::string& name)
 	// printf("x: %d\n", g_xi);
 	// printf("atomic x: %d\n", g_atomic_int.load());
     assert(g_xi == expect || g_atomic_int.load() == expect);
-    
+
 	for(int i=0; i<n; i++)
     {
         delete pthreads[i];

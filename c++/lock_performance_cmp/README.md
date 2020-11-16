@@ -26,5 +26,6 @@ sem_cond TimeCost 8267us
 
 
 ## conclusion
-atomic is not always perform best. it will add too much memory barrier, and caused too much cpu cost.
+atomic is not always perform best. it will add too much memory barrier if we want to modify data, and caused too much cpu cost.
 <br>we can consider condition valriable in most scene
+<br>***but if we only read atomic value, it will much faster than spin lock(almost closed speed with raw value), because we do not modify data***
