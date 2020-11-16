@@ -13,12 +13,23 @@
 
 const uint32_t MAX_SIZE = 10240;
 
-int main()
+int main(int argc, char** argv)
 {
     std::string server_host = "127.0.0.1";
+    if(argc > 1)
+    {
+        server_host = argv[1];
+    }
+
     int sock_fd;
 	struct sockaddr_in server_addr;
 	int port_number = 9099;
+    if(argc > 2)
+    {
+        port_number = std::stoi(argv[2]);
+    }
+
+    printf("connet to sever: %s, port: %d\n", server_host.c_str(), port_number);
 
 	if ((sock_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		fprintf(stderr,"client Socket error:%s\n\a", strerror(errno));
@@ -52,15 +63,37 @@ int main()
     // char msg[MAX_SIZE] = {0};
     // memset(msg, '1', MAX_SIZE);
 
-    std::string msg = "hello from client";
+    int send_cnt = 2;
+    std::string msg = "hello";
     int total = msg.length();
     int left = total;
-    while(left)
+	char buff[1024] = {0};
+    while(send_cnt > 0)
     {
-        int n_sent = send(sock_fd, msg.c_str(), msg.length(), 0);
-        left = total - n_sent;
-    }
+        while(left)
+        {
+            int n_sent = send(sock_fd, msg.c_str(), msg.length(), 0);
+            left = total - n_sent;
 
+        }
+        left = total;
+        
+        // usleep(10000);
+        --send_cnt;
+        // if(send_cnt % 2 == 0)
+        // {
+            // int ret = recv(sock_fd, buff, sizeof(buff), 0);
+        // }
+        usleep(100000);
+    }
+    printf("send finish\n");
+
+    while(send_cnt++ < 1000)
+    {
+        int ret = recv(sock_fd, buff, sizeof(buff), 0);
+    }
+    printf("read finish\n");
+    while(true);
     close(sock_fd);
 
     return 0;
